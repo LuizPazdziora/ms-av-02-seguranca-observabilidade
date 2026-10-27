@@ -20,6 +20,7 @@ import aula.microservicos.login.exception.SenhaInvalidaException;
 import aula.microservicos.login.exception.UsuarioBloqueadoException;
 import aula.microservicos.login.exception.UsuarioJaCadastradoException;
 import aula.microservicos.login.exception.UsuarioNaoLocalizadoException;
+import aula.microservicos.login.metrica.MetricaLogin;
 import aula.microservicos.login.repository.LoginAttemptRepository;
 import aula.microservicos.login.repository.UsuarioRepository;
 
@@ -37,12 +38,14 @@ public class LoginServico {
     private UsuarioRepository usuarioRepo = null;
     private LoginAttemptRepository tentativaRepo = null;
     private PasswordEncoder passwordEncoder = null;
+    private MetricaLogin metrica = null;
 
     public LoginServico(UsuarioRepository usuarioRepo, LoginAttemptRepository tentativaRepo,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder, MetricaLogin metrica) {
         this.usuarioRepo = usuarioRepo;
         this.tentativaRepo = tentativaRepo;
         this.passwordEncoder = passwordEncoder;
+        this.metrica = metrica;
     }
 
     // senha nula, vazia ou com mais de 72 bytes em UTF-8 e considerada invalida
@@ -61,6 +64,16 @@ public class LoginServico {
 
     @Transactional
     public boolean login(String username, String senha) {
+        boolean valido = validarLogin(username, senha);
+        if (valido) {
+            metrica.registrarLoginValido();
+        } else {
+            metrica.registrarLoginInvalido();
+        }
+        return valido;
+    }
+
+    private boolean validarLogin(String username, String senha) {
 
         if (username == null || username.isBlank() || !senhaDentroDoPadrao(senha)) {
             logger.debug("Login invalido: dados incompletos ou fora do padrao");
