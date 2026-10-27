@@ -1,0 +1,32 @@
+name: ms-av-02
+
+services:
+
+  login-service:
+    build:
+      context: ./login-service
+      args:
+        SKIP_TESTS: ${SKIP_TESTS:-false}
+    image: ms-av-02/login-service:local
+    environment:
+      H2_URL: jdbc:h2:file:/data/logindb
+      H2_USERNAME: ${H2_USERNAME:-sa}
+      H2_PASSWORD: ${H2_PASSWORD:-h2-demo}
+      DEMO_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD:-admin-demo}
+      DEMO_MANUTENCAO_PASSWORD: ${DEMO_MANUTENCAO_PASSWORD:-manutencao-demo}
+      DEMO_USUARIOS_PASSWORD: ${DEMO_USUARIOS_PASSWORD:-usuario-demo}
+    ports:
+      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:8081:8081"
+    volumes:
+      - h2-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{}' http://localhost:8080/login | grep -q 401"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    restart: unless-stopped
+
+volumes:
+  h2-data:
