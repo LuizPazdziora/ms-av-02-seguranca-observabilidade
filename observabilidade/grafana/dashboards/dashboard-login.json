@@ -1,43 +1,14 @@
 {
-  "id": null,
-  "uid": "ms-av-02-login",
-  "title": "MS-AV-02 - Login",
-  "description": "Indicadores do servico de login: logins validos, invalidos e usuarios bloqueados",
-  "tags": [
-    "ms-av-02",
-    "login"
-  ],
-  "timezone": "browser",
-  "editable": false,
-  "graphTooltip": 1,
-  "schemaVersion": 41,
-  "version": 1,
-  "refresh": "5s",
-  "time": {
-    "from": "now-15m",
-    "to": "now"
-  },
-  "timepicker": {
-    "refresh_intervals": [
-      "5s",
-      "10s",
-      "30s",
-      "1m",
-      "5m"
-    ]
-  },
-  "templating": {
-    "list": []
-  },
   "annotations": {
     "list": []
   },
+  "description": "Indicadores do servico de login: logins validos, invalidos e usuarios bloqueados",
+  "editable": false,
+  "graphTooltip": 1,
+  "id": null,
   "links": [],
   "panels": [
     {
-      "id": 100,
-      "type": "row",
-      "title": "Indicadores obrigatorios (MS-AV-02)",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -45,31 +16,25 @@
         "x": 0,
         "y": 0
       },
-      "panels": []
+      "id": 100,
+      "panels": [],
+      "title": "Indicadores obrigatorios (MS-AV-02)",
+      "type": "row"
     },
     {
-      "id": 1,
-      "type": "stat",
-      "title": "Logins válidos (desde a inicialização)",
-      "description": "Quantidade de POST /login com usuario e senha validos desde a inicializacao do servico. O contador e um Counter do Micrometer: ele ZERA quando o login-service reinicia. Para o total de um intervalo, veja o painel 'no periodo'.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 0,
-        "y": 1
-      },
+      "description": "Quantidade de POST /login com usuario e senha validos desde a inicializacao do servico. O contador e um Counter do Micrometer: ele ZERA quando o login-service reinicia. Para o total de um intervalo, veja o painel 'no periodo'.",
       "fieldConfig": {
         "defaults": {
-          "unit": "none",
-          "decimals": 0,
           "color": {
-            "mode": "fixed",
-            "fixedColor": "green"
+            "fixedColor": "green",
+            "mode": "fixed"
           },
+          "decimals": 0,
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -79,11 +44,22 @@
               }
             ]
           },
-          "mappings": []
+          "unit": "none"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 1
+      },
+      "id": 1,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -91,13 +67,9 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
+        "showPercentChange": false,
         "textMode": "auto",
-        "wideLayout": true,
-        "showPercentChange": false
+        "wideLayout": true
       },
       "targets": [
         {
@@ -106,36 +78,29 @@
             "uid": "prometheus"
           },
           "expr": "sum(login_validos_total{application=\"login\"})",
+          "instant": false,
           "legendFormat": "Logins válidos (desde a inicialização)",
-          "refId": "A",
           "range": true,
-          "instant": false
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Logins válidos (desde a inicialização)",
+      "type": "stat"
     },
     {
-      "id": 2,
-      "type": "stat",
-      "title": "Logins inválidos (desde a inicialização)",
-      "description": "Quantidade de POST /login invalidos (senha errada, usuario inexistente, dados incompletos ou usuario bloqueado) desde a inicializacao do servico. O contador e um Counter do Micrometer: ele ZERA quando o login-service reinicia. Para o total de um intervalo, veja o painel 'no periodo'.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 1
-      },
+      "description": "Quantidade de POST /login invalidos (senha errada, usuario inexistente, dados incompletos ou usuario bloqueado) desde a inicializacao do servico. O contador e um Counter do Micrometer: ele ZERA quando o login-service reinicia. Para o total de um intervalo, veja o painel 'no periodo'.",
       "fieldConfig": {
         "defaults": {
-          "unit": "none",
-          "decimals": 0,
           "color": {
-            "mode": "fixed",
-            "fixedColor": "red"
+            "fixedColor": "red",
+            "mode": "fixed"
           },
+          "decimals": 0,
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -145,11 +110,22 @@
               }
             ]
           },
-          "mappings": []
+          "unit": "none"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 1
+      },
+      "id": 2,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -157,13 +133,9 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
+        "showPercentChange": false,
         "textMode": "auto",
-        "wideLayout": true,
-        "showPercentChange": false
+        "wideLayout": true
       },
       "targets": [
         {
@@ -172,36 +144,29 @@
             "uid": "prometheus"
           },
           "expr": "sum(login_invalidos_total{application=\"login\"})",
+          "instant": false,
           "legendFormat": "Logins inválidos (desde a inicialização)",
-          "refId": "A",
           "range": true,
-          "instant": false
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Logins inválidos (desde a inicialização)",
+      "type": "stat"
     },
     {
-      "id": 3,
-      "type": "stat",
-      "title": "Usuários bloqueados (atual)",
-      "description": "Total atual de usuarios bloqueados (Gauge que consulta a tabela login_attempts a cada coleta; reflete o banco mesmo apos reinicios e desbloqueios).",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 1
-      },
+      "description": "Total atual de usuarios bloqueados (Gauge que consulta a tabela login_attempts a cada coleta; reflete o banco mesmo apos reinicios e desbloqueios).",
       "fieldConfig": {
         "defaults": {
-          "unit": "none",
-          "decimals": 0,
           "color": {
-            "mode": "fixed",
-            "fixedColor": "orange"
+            "fixedColor": "orange",
+            "mode": "fixed"
           },
+          "decimals": 0,
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -211,11 +176,22 @@
               }
             ]
           },
-          "mappings": []
+          "unit": "none"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 1
+      },
+      "id": 3,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -223,13 +199,9 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
+        "showPercentChange": false,
         "textMode": "auto",
-        "wideLayout": true,
-        "showPercentChange": false
+        "wideLayout": true
       },
       "targets": [
         {
@@ -238,17 +210,16 @@
             "uid": "prometheus"
           },
           "expr": "max(usuarios_bloqueados{application=\"login\"})",
+          "instant": false,
           "legendFormat": "Usuários bloqueados (atual)",
-          "refId": "A",
           "range": true,
-          "instant": false
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Usuários bloqueados (atual)",
+      "type": "stat"
     },
     {
-      "id": 101,
-      "type": "row",
-      "title": "Indicadores adicionais",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -256,31 +227,25 @@
         "x": 0,
         "y": 7
       },
-      "panels": []
+      "id": 101,
+      "panels": [],
+      "title": "Indicadores adicionais",
+      "type": "row"
     },
     {
-      "id": 4,
-      "type": "stat",
-      "title": "Logins válidos no período",
-      "description": "Total de logins validos no intervalo selecionado. increase() trata o reinicio do contador; round() remove a extrapolacao fracionaria.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 0,
-        "y": 8
-      },
+      "description": "Total de logins validos no intervalo selecionado. increase() trata o reinicio do contador; round() remove a extrapolacao fracionaria.",
       "fieldConfig": {
         "defaults": {
-          "unit": "none",
-          "decimals": 0,
           "color": {
-            "mode": "fixed",
-            "fixedColor": "green"
+            "fixedColor": "green",
+            "mode": "fixed"
           },
+          "decimals": 0,
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -290,11 +255,22 @@
               }
             ]
           },
-          "mappings": []
+          "unit": "none"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 4,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -302,13 +278,9 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
+        "showPercentChange": false,
         "textMode": "auto",
-        "wideLayout": true,
-        "showPercentChange": false
+        "wideLayout": true
       },
       "targets": [
         {
@@ -317,36 +289,29 @@
             "uid": "prometheus"
           },
           "expr": "round(sum(increase(login_validos_total{application=\"login\"}[$__range])))",
+          "instant": false,
           "legendFormat": "Logins válidos no período",
-          "refId": "A",
           "range": true,
-          "instant": false
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Logins válidos no período",
+      "type": "stat"
     },
     {
-      "id": 5,
-      "type": "stat",
-      "title": "Logins inválidos no período",
-      "description": "Total de logins invalidos no intervalo selecionado. increase() trata o reinicio do contador; round() remove a extrapolacao fracionaria.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 12,
-        "y": 8
-      },
+      "description": "Total de logins invalidos no intervalo selecionado. increase() trata o reinicio do contador; round() remove a extrapolacao fracionaria.",
       "fieldConfig": {
         "defaults": {
-          "unit": "none",
-          "decimals": 0,
           "color": {
-            "mode": "fixed",
-            "fixedColor": "red"
+            "fixedColor": "red",
+            "mode": "fixed"
           },
+          "decimals": 0,
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -356,11 +321,22 @@
               }
             ]
           },
-          "mappings": []
+          "unit": "none"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 5,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -368,13 +344,9 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
+        "showPercentChange": false,
         "textMode": "auto",
-        "wideLayout": true,
-        "showPercentChange": false
+        "wideLayout": true
       },
       "targets": [
         {
@@ -383,43 +355,36 @@
             "uid": "prometheus"
           },
           "expr": "round(sum(increase(login_invalidos_total{application=\"login\"}[$__range])))",
+          "instant": false,
           "legendFormat": "Logins inválidos no período",
-          "refId": "A",
           "range": true,
-          "instant": false
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Logins inválidos no período",
+      "type": "stat"
     },
     {
-      "id": 6,
-      "type": "timeseries",
-      "title": "Logins por minuto",
-      "description": "Logins validos e invalidos por minuto (increase em janela de 1 minuto).",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 14
-      },
+      "description": "Logins validos e invalidos por minuto (increase em janela de 1 minuto).",
       "fieldConfig": {
         "defaults": {
-          "unit": "none",
-          "decimals": 0,
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
             "drawStyle": "line",
-            "lineWidth": 2,
             "fillOpacity": 15,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
             "showPoints": "auto",
-            "spanNulls": false,
-            "lineInterpolation": "linear"
-          }
+            "spanNulls": false
+          },
+          "decimals": 0,
+          "unit": "none"
         },
         "overrides": [
           {
@@ -431,8 +396,8 @@
               {
                 "id": "color",
                 "value": {
-                  "mode": "fixed",
-                  "fixedColor": "green"
+                  "fixedColor": "green",
+                  "mode": "fixed"
                 }
               }
             ]
@@ -446,14 +411,21 @@
               {
                 "id": "color",
                 "value": {
-                  "mode": "fixed",
-                  "fixedColor": "red"
+                  "fixedColor": "red",
+                  "mode": "fixed"
                 }
               }
             ]
           }
         ]
       },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 14
+      },
+      "id": 6,
       "options": {
         "legend": {
           "displayMode": "list",
@@ -472,10 +444,10 @@
             "uid": "prometheus"
           },
           "expr": "sum(increase(login_validos_total{application=\"login\"}[1m]))",
+          "instant": false,
           "legendFormat": "válidos",
-          "refId": "A",
           "range": true,
-          "instant": false
+          "refId": "A"
         },
         {
           "datasource": {
@@ -483,43 +455,36 @@
             "uid": "prometheus"
           },
           "expr": "sum(increase(login_invalidos_total{application=\"login\"}[1m]))",
+          "instant": false,
           "legendFormat": "inválidos",
-          "refId": "B",
           "range": true,
-          "instant": false
+          "refId": "B"
         }
-      ]
+      ],
+      "title": "Logins por minuto",
+      "type": "timeseries"
     },
     {
-      "id": 7,
-      "type": "timeseries",
-      "title": "Bloqueados ao longo do tempo",
-      "description": "Evolucao do total de usuarios bloqueados.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 14
-      },
+      "description": "Evolucao do total de usuarios bloqueados.",
       "fieldConfig": {
         "defaults": {
-          "unit": "none",
-          "decimals": 0,
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
             "drawStyle": "line",
-            "lineWidth": 2,
             "fillOpacity": 15,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
             "showPoints": "auto",
-            "spanNulls": false,
-            "lineInterpolation": "linear"
-          }
+            "spanNulls": false
+          },
+          "decimals": 0,
+          "unit": "none"
         },
         "overrides": [
           {
@@ -531,14 +496,21 @@
               {
                 "id": "color",
                 "value": {
-                  "mode": "fixed",
-                  "fixedColor": "orange"
+                  "fixedColor": "orange",
+                  "mode": "fixed"
                 }
               }
             ]
           }
         ]
       },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 14
+      },
+      "id": 7,
       "options": {
         "legend": {
           "displayMode": "list",
@@ -557,12 +529,40 @@
             "uid": "prometheus"
           },
           "expr": "max(usuarios_bloqueados{application=\"login\"})",
+          "instant": false,
           "legendFormat": "bloqueados",
-          "refId": "A",
           "range": true,
-          "instant": false
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Bloqueados ao longo do tempo",
+      "type": "timeseries"
     }
-  ]
+  ],
+  "refresh": "5s",
+  "schemaVersion": 41,
+  "tags": [
+    "ms-av-02",
+    "login"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m"
+    ]
+  },
+  "timezone": "browser",
+  "title": "MS-AV-02 - Login",
+  "uid": "ms-av-02-login",
+  "version": 1
 }

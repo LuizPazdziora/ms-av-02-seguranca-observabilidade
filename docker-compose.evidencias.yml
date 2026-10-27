@@ -1,0 +1,20 @@
+# Opcional: renderizador de imagens do Grafana para gerar a evidencia img/dashboard-grafana.png
+# Uso: docker compose -f docker-compose.yml -f docker-compose.evidencias.yml up -d --wait
+# O token compartilhado entre Grafana e renderizador vem do .env (padrao somente de demonstracao);
+# o Grafana recusa o valor padrao "-" do renderer_token.
+services:
+
+  renderer:
+    image: grafana/grafana-image-renderer:v5.12.6
+    environment:
+      AUTH_TOKEN: ${GRAFANA_RENDERER_TOKEN:-renderer-demo}
+    restart: unless-stopped
+
+  grafana:
+    environment:
+      GF_RENDERING_SERVER_URL: http://renderer:8081/render
+      GF_RENDERING_CALLBACK_URL: http://grafana:3000/
+      GF_RENDERING_RENDERER_TOKEN: ${GRAFANA_RENDERER_TOKEN:-renderer-demo}
+    depends_on:
+      renderer:
+        condition: service_started
