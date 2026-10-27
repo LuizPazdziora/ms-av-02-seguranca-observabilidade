@@ -28,6 +28,8 @@ services:
   login-service:
     environment:
       SPRING_PROFILES_ACTIVE: oauth2
+      # fluxo legado POST /token (grant_type=password): somente demonstracao local
+      TOKEN_LEGADO_HABILITADO: ${TOKEN_LEGADO_HABILITADO:-false}
     depends_on:
       keycloak:
         condition: service_healthy

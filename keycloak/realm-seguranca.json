@@ -39,6 +39,20 @@
         "pkce.code.challenge.method": "S256",
         "post.logout.redirect.uris": "http://localhost:8080/swagger-ui/index.html"
       }
+    },
+    {
+      "clientId": "seguranca-legado",
+      "name": "Fluxo legado das aulas (grant_type=password) - somente demonstracao local",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "fullScopeAllowed": true,
+      "redirectUris": [],
+      "webOrigins": []
     }
   ],
   "users": [

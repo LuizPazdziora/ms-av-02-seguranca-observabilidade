@@ -64,6 +64,13 @@ class OAuth2SecurityTests {
     }
 
     @Test
+    void fluxoLegadoDeTokenDesligadoPorPadrao() throws Exception {
+        mockMvc.perform(post("/token").contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(new LoginBean("admin", "qualquer"))))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void endpointsPublicosContinuamPublicos() throws Exception {
         mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(new LoginBean("joao", "usuario-teste"))))

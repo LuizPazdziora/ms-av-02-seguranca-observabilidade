@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -49,6 +50,15 @@ public class GlobalExceptionHandler {
             reason = "Senha deve conter no máximo 72 bytes!")
     @ExceptionHandler(SenhaForaDoPadraoException.class)
     public void handleException(SenhaForaDoPadraoException e) {
+
+    }
+
+    // fluxo legado (POST /token): credencial recusada pelo Keycloak
+    @ResponseStatus(
+            value = HttpStatus.UNAUTHORIZED,
+            reason = "Credenciais inválidas!")
+    @ExceptionHandler(HttpClientErrorException.class)
+    public void handleException(HttpClientErrorException e) {
 
     }
 
