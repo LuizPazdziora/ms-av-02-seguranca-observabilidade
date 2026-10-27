@@ -1,0 +1,33 @@
+# Extensao opcional (nao exigida pelo enunciado): OAuth2 com Keycloak
+# Uso: docker compose -f docker-compose.yml -f docker-compose.oauth2.yml up --build -d
+#      ./keycloak/configurar-usuarios.sh
+services:
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.0
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-keycloak-demo}
+      KC_HOSTNAME: http://localhost:9090
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "127.0.0.1:9090:8080"
+    volumes:
+      - ./keycloak:/opt/keycloak/data/import:ro
+    healthcheck:
+      # a imagem do Keycloak nao tem curl/wget: usa o /dev/tcp do bash na porta de gerenciamento (9000)
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '\"UP\"' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+    restart: unless-stopped
+
+  login-service:
+    environment:
+      SPRING_PROFILES_ACTIVE: oauth2
+    depends_on:
+      keycloak:
+        condition: service_healthy
