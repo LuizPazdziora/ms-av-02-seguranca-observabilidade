@@ -1,17 +1,21 @@
 package aula.microservicos.login.bean;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+@Schema(name="CadastroUsuario", description = "Dados para o cadastro de um novo usuario")
 public class CadastroUsuarioBean {
 
     // limite de 50 caracteres: users.username e varchar(50) no schema fixo do Spring Security
     @NotBlank(message = "Username deve ser informado")
     @Size(max = 50, message = "Username deve conter no maximo 50 caracteres")
+    @Schema(name = "username", description = "Username (maximo 50 caracteres)", example = "pedro", maxLength = 50, requiredMode = Schema.RequiredMode.REQUIRED)
     private String username;
 
     @NotBlank(message = "Senha deve ser informada")
     @Size(max = 72, message = "Senha deve conter no maximo 72 caracteres")
+    @Schema(name = "senha", description = "Senha (maximo 72 caracteres/bytes)", example = "senha-pedro-demo", maxLength = 72, requiredMode = Schema.RequiredMode.REQUIRED)
     private String senha;
 
     public CadastroUsuarioBean() {
