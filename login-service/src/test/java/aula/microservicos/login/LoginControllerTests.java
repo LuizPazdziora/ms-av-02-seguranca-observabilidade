@@ -2,6 +2,7 @@ package aula.microservicos.login;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -18,6 +19,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import aula.microservicos.login.bean.CadastroUsuarioBean;
 import aula.microservicos.login.bean.LoginBean;
@@ -31,6 +34,9 @@ import tools.jackson.databind.ObjectMapper;
 class LoginControllerTests {
 
     private static final String SENHA_USUARIO = "usuario-teste";
+
+    private static final RequestPostProcessor ADMIN = httpBasic("admin", "admin-teste");
+    private static final RequestPostProcessor MANUTENCAO = httpBasic("manutencao", "manutencao-teste");
 
     @Autowired
     private MockMvc mockMvc;
@@ -49,10 +55,10 @@ class LoginControllerTests {
                 .content(mapper.writeValueAsString(new TrocaSenhaBean(atual, nova))));
     }
 
-    private ResultActions cadastrar(String username, String senha) throws Exception {
-        return mockMvc.perform(post("/")
+    private MockHttpServletRequestBuilder cadastro(String username, String senha) throws Exception {
+        return post("/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(new CadastroUsuarioBean(username, senha))));
+                .content(mapper.writeValueAsString(new CadastroUsuarioBean(username, senha)));
     }
 
     private void bloquear(String username) throws Exception {
@@ -73,6 +79,8 @@ class LoginControllerTests {
         login("joao", "errada").andExpect(status().isUnauthorized());
         // continua negado mesmo com a senha correta
         login("joao", SENHA_USUARIO).andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/").with(MANUTENCAO))
+                .andExpect(jsonPath("$[?(@.username == 'joao')].bloqueado").value(true));
     }
 
     @Test
@@ -92,40 +100,56 @@ class LoginControllerTests {
         login("joao", "a".repeat(73)).andExpect(status().isUnauthorized());
         // 72 caracteres acentuados = 144 bytes em UTF-8
         login("maria", "á".repeat(72)).andExpect(status().isUnauthorized());
+        // operadores nao sao usuarios do sistema generico
+        login("admin", "admin-teste").andExpect(status().isUnauthorized());
     }
 
     // 4
     @Test
-    void desbloqueioPermiteNovoLogin() throws Exception {
+    void desbloqueioPeloAdminPermiteNovoLogin() throws Exception {
         bloquear("joao");
-        mockMvc.perform(put("/unlock/joao")).andExpect(status().isOk());
+        mockMvc.perform(put("/unlock/joao").with(ADMIN)).andExpect(status().isOk());
         login("joao", SENHA_USUARIO).andExpect(status().isOk());
     }
 
     // 5
     @Test
-    void desbloqueioUsuarioInexistente() throws Exception {
-        mockMvc.perform(put("/unlock/inexistente")).andExpect(status().isNotFound());
+    void desbloqueioExigeRoleAdmin() throws Exception {
+        mockMvc.perform(put("/unlock/joao").with(MANUTENCAO)).andExpect(status().isForbidden());
+        mockMvc.perform(put("/unlock/joao")).andExpect(status().isUnauthorized());
+        mockMvc.perform(put("/unlock/joao").with(httpBasic("admin", "senha-errada"))).andExpect(status().isUnauthorized());
+        mockMvc.perform(put("/unlock/inexistente").with(ADMIN)).andExpect(status().isNotFound());
+        // usuario do sistema (ROLE_USER) autentica, mas nao tem a role exigida
+        mockMvc.perform(put("/unlock/joao").with(httpBasic("joao", SENHA_USUARIO))).andExpect(status().isForbidden());
     }
 
     // 6
     @Test
-    void listarNaoExpoeSenha() throws Exception {
-        mockMvc.perform(get("/"))
+    void listarExigeRoleManutencaoENaoExpoeSenha() throws Exception {
+        mockMvc.perform(get("/")).andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/").with(ADMIN)).andExpect(status().isForbidden());
+        mockMvc.perform(get("/").with(MANUTENCAO))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].username").value("joao"))
                 .andExpect(jsonPath("$[1].username").value("maria"))
                 .andExpect(jsonPath("$[0].senha").doesNotExist())
-                .andExpect(content().string(not(containsString("$2a$"))));
+                .andExpect(jsonPath("$[0].password").doesNotExist())
+                .andExpect(content().string(not(containsString("$2a$"))))
+                .andExpect(content().string(not(containsString("admin"))));
     }
 
     // 7
     @Test
-    void cadastroDeUsuario() throws Exception {
-        cadastrar("pedro", "senha-pedro").andExpect(status().isCreated())
+    void cadastroExigeRoleManutencao() throws Exception {
+        mockMvc.perform(cadastro("pedro", "senha-pedro").with(MANUTENCAO)).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.username").value("pedro"))
-                .andExpect(jsonPath("$.bloqueado").value(false));
-        cadastrar("pedro", "senha-pedro").andExpect(status().isConflict());
+                .andExpect(jsonPath("$.bloqueado").value(false))
+                .andExpect(jsonPath("$.senha").doesNotExist());
+        mockMvc.perform(cadastro("pedro", "senha-pedro").with(MANUTENCAO)).andExpect(status().isConflict());
+        mockMvc.perform(cadastro("ana", "senha-ana").with(ADMIN)).andExpect(status().isForbidden());
+        mockMvc.perform(cadastro("ana", "senha-ana")).andExpect(status().isUnauthorized());
+        mockMvc.perform(cadastro("admin", "outra-senha").with(MANUTENCAO)).andExpect(status().isConflict());
         login("pedro", "senha-pedro").andExpect(status().isOk());
     }
 
@@ -152,11 +176,11 @@ class LoginControllerTests {
         trocarSenha("joao", SENHA_USUARIO, "").andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.nova").exists());
         trocarSenha("joao", SENHA_USUARIO, "a".repeat(73)).andExpect(status().isBadRequest());
-        cadastrar("", "senha").andExpect(status().isBadRequest())
+        mockMvc.perform(cadastro("", "senha").with(MANUTENCAO)).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.username").exists());
-        cadastrar("u".repeat(51), "senha").andExpect(status().isBadRequest());
+        mockMvc.perform(cadastro("u".repeat(51), "senha").with(MANUTENCAO)).andExpect(status().isBadRequest());
         // 72 caracteres, mas mais de 72 bytes em UTF-8
-        cadastrar("acentuado", "á".repeat(72)).andExpect(status().isBadRequest());
+        mockMvc.perform(cadastro("acentuado", "á".repeat(72)).with(MANUTENCAO)).andExpect(status().isBadRequest());
     }
 
 }

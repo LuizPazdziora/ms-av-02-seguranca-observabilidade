@@ -8,7 +8,9 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,19 +41,29 @@ public class LoginServico {
     private LoginAttemptRepository tentativaRepo = null;
     private PasswordEncoder passwordEncoder = null;
     private MetricaLogin metrica = null;
+    private JdbcUserDetailsManager userDetailsManager = null;
 
     public LoginServico(UsuarioRepository usuarioRepo, LoginAttemptRepository tentativaRepo,
-            PasswordEncoder passwordEncoder, MetricaLogin metrica) {
+            PasswordEncoder passwordEncoder, MetricaLogin metrica, JdbcUserDetailsManager userDetailsManager) {
         this.usuarioRepo = usuarioRepo;
         this.tentativaRepo = tentativaRepo;
         this.passwordEncoder = passwordEncoder;
         this.metrica = metrica;
+        this.userDetailsManager = userDetailsManager;
     }
 
     // senha nula, vazia ou com mais de 72 bytes em UTF-8 e considerada invalida
     private boolean senhaDentroDoPadrao(String senha) {
         return senha != null && !senha.isBlank()
                 && senha.getBytes(StandardCharsets.UTF_8).length <= MAXIMO_BYTES_SENHA;
+    }
+
+    // users.enabled = NOT login_attempts.locked (o mesmo DataSource participa da transacao JPA)
+    private void sincronizarHabilitado(String username, boolean habilitado) {
+        if (userDetailsManager.userExists(username)) {
+            userDetailsManager.updateUser(User.withUserDetails(userDetailsManager.loadUserByUsername(username))
+                    .disabled(!habilitado).build());
+        }
     }
 
     private LoginAttemptEntity obterTentativas(String username) {
@@ -110,6 +122,7 @@ public class LoginServico {
         if (tentativa.getFailedAttempts() > MAXIMO_FALHAS) {
             tentativa.setLocked(true);
             tentativa.setLockedAt(agora);
+            sincronizarHabilitado(username, false);
             logger.debug("Usuario bloqueado = " + username);
         }
         tentativaRepo.save(tentativa);
@@ -144,6 +157,12 @@ public class LoginServico {
         usuario.setSenha(hash);
         usuarioRepo.save(usuario);
 
+        // mesmo hash em users.password (nao usa changePassword: ele depende de um usuario autenticado)
+        if (userDetailsManager.userExists(userid)) {
+            userDetailsManager.updateUser(User.withUserDetails(userDetailsManager.loadUserByUsername(userid))
+                    .password(hash).build());
+        }
+
         tentativa.setUpdatedAt(LocalDateTime.now());
         tentativaRepo.save(tentativa);
 
@@ -153,7 +172,8 @@ public class LoginServico {
     @Transactional
     public UsuarioBean cadastrar(String username, String senha) {
 
-        if (usuarioRepo.existsById(username)) {
+        // tambem verifica users para nao colidir com os operadores (admin, manutencao)
+        if (usuarioRepo.existsById(username) || userDetailsManager.userExists(username)) {
             throw new UsuarioJaCadastradoException();
         }
 
@@ -164,6 +184,7 @@ public class LoginServico {
         String hash = passwordEncoder.encode(senha);
         usuarioRepo.save(new UsuarioEntity(username, hash));
         tentativaRepo.save(new LoginAttemptEntity(username));
+        userDetailsManager.createUser(User.withUsername(username).password(hash).roles("USER").build());
 
         logger.debug("Usuario cadastrado = " + username);
         return new UsuarioBean(username, false, 0);
@@ -182,6 +203,7 @@ public class LoginServico {
         tentativa.setLockedAt(null);
         tentativa.setUpdatedAt(LocalDateTime.now());
         tentativaRepo.save(tentativa);
+        sincronizarHabilitado(userid, true);
 
         logger.debug("Usuario desbloqueado = " + userid);
     }
